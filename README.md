@@ -1,4 +1,4 @@
-this is a python http client library
+## Installation
 
 ```sh
 pip install snakifit
