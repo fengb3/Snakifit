@@ -1,4 +1,4 @@
-from my_http_client import *
+from http_client_py.my_http_client import *
 
 @http_host(base_url="http://localhost:5049")
 class MyHttpApiHost:
