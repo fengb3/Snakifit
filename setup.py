@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="snakifit",
-    version="0.0.1",
+    version="0.0.1b",
     description="A python http client library inspired by Retrofit, Refit",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
