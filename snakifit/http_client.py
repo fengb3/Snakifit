@@ -3,7 +3,7 @@ import inspect
 import logging
 import re
 from typing import Dict, get_type_hints, Callable, Union, List, get_origin, get_args
-import requests
+from requests import Request, Session
 from requests.exceptions import RequestException
 
 
@@ -17,17 +17,19 @@ def http_host(base_url: str = ""):
         
         def log_request(self, method: str, url: str, headers: dict, params: dict, data: Union[dict, None]):
             if self.enable_logging:
-                self.logger.info(f"Request - Method: {method}, URL: {url}, Headers: {headers}, Params: {params}, Data: {data}")
-                
+                self.logger.info(
+                    f"Request - Method: {method}, URL: {url}, Headers: {headers}, Params: {params}, Data: {data}")
+        
         def log_response(self, response):
             if self.enable_logging:
                 self.logger.info(f"with status code : {response.status_code} "
-                             f"with content : {response.content}")
-                
+                                 f"with content : {response.content}")
+        
         cls.log_request = log_request
         cls.log_response = log_response
         
         return cls
+    
     return decorator
 
 
@@ -83,7 +85,15 @@ def _extract_and_send(method_name: str, api, uri: str, func: Callable, *args, **
     api.log_request(method_name, url, headers, queries, data)
     
     try:
-        response = requests.request(method_name, url, params=queries, headers=headers, data=data, timeout=100)
+        request = Request(
+            method=method_name,
+            url=url,
+            params=queries,
+            headers=headers,
+            data=data
+        )
+        response = Session().send(request.prepare())
+        # response = requests.request(method_name, url, params=queries, headers=headers, data=data, timeout=100)
         api.log_response(response)
         response.raise_for_status()
     except RequestException as e:
@@ -102,7 +112,7 @@ def _extract_and_send(method_name: str, api, uri: str, func: Callable, *args, **
     # return return_type.parse_obj(response.json())
     
     # Check return type is a type that extends from BaseModel
-    if hasattr(return_type, "parse_obj") :
+    if hasattr(return_type, "parse_obj"):
         return return_type.parse_obj(data_dict)
     
     if get_origin(return_type) is list:
@@ -120,25 +130,48 @@ def _extract_and_send(method_name: str, api, uri: str, func: Callable, *args, **
     
     return data_dict
 
+
+class HttpEndpoint:
+    uri: str
+    http_method_name: str
+    args: List[str]
+    kwargs: Dict[str, str]
+    
+    def __init__(self, http_method_name: str):
+        self.http_method_name = http_method_name.upper()
+    
+    # @staticmethod
+    # def __call__(self, *args, **kwargs):
+    #     def wrapper(func):
+    #         func.http_endpoint = HttpEndpoint(self.http_method_name)
+    #         return func
+    #     
+    #     return wrapper
+        
+
+
 def http_endpoint(method_name: str):
     def decorator(uri):
         def wrapper(func):
-            @functools.wraps(func)
-            def wrapped(api, *args, **kwargs):
-                return _extract_and_send(
-                    method_name,
-                    api,
-                    uri,
-                    func,
-                    *args,
-                    **kwargs
-                )
+            func.http_endpoint = HttpEndpoint(method_name)
             
-            return wrapped
+            return func
+            # @functools.wraps(func)
+            # def wrapped(api, *args, **kwargs):
+            #     return _extract_and_send(
+            #         method_name,
+            #         api,
+            #         uri,
+            #         func,
+            #         *args,
+            #         **kwargs
+            #     )
+            # return wrapped
         
         return wrapper
     
     return decorator
+
 
 http_get = http_endpoint("GET")
 http_post = http_endpoint("POST")
@@ -150,4 +183,12 @@ http_options = http_endpoint("OPTIONS")
 http_trace = http_endpoint("TRACE")
 http_connect = http_endpoint("CONNECT")
 
-    
+# http_get2 = HttpEndpoint("GET")
+# http_post2 = HttpEndpoint("POST")
+# http_put2 = HttpEndpoint("PUT")
+# http_delete2 = HttpEndpoint("DELETE")
+# http_patch2 = HttpEndpoint("PATCH")
+# http_head2 = HttpEndpoint("HEAD")
+# http_options2 = HttpEndpoint("OPTIONS")
+# http_trace2 = HttpEndpoint("TRACE")
+# http_connect2 = HttpEndpoint("CONNECT")
