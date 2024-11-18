@@ -131,36 +131,42 @@ def _extract_and_send(method_name: str, api, uri: str, func: Callable, *args, **
     return data_dict
 
 
-class HttpEndpoint:
+class HttpEndpointInfo:
     uri: str
     http_method_name: str
+    path_keys: List[str]
     args: List[str]
     kwargs: Dict[str, str]
     
-    def __init__(self, http_method_name: str):
+    def __init__(self, http_method_name: str, uri: str = ""):
         self.http_method_name = http_method_name.upper()
+        self.uri = uri
+        self.path_keys = re.findall(r'{(.*?)}', uri)
     
-    # @staticmethod
-    # def __call__(self, *args, **kwargs):
-    #     def wrapper(func):
-    #         func.http_endpoint = HttpEndpoint(self.http_method_name)
-    #         return func
-    #     
-    #     return wrapper
-        
-
+    def check_path_params(self, func: Callable):
+        """检查函数的参数是否包含所有的path参数"""
+        signature = inspect.signature(func)
+        param_names = list(signature.parameters.keys())
+        missing_params = []
+        for key in self.path_keys:
+            if key not in param_names:
+                missing_params.append(key)
+        if missing_params:
+            raise ValueError(f"Missing path parameter(s) '{', '.join(missing_params)}' in function {func.__name__}")
 
 def http_endpoint(method_name: str):
     def decorator(uri):
         def wrapper(func):
-            func.http_endpoint = HttpEndpoint(method_name)
+            http_endpoint_info = HttpEndpointInfo(method_name, uri)
+            http_endpoint_info.check_path_params(func)
+            func.http_endpoint_info = http_endpoint_info
             
             return func
             # @functools.wraps(func)
             # def wrapped(api, *args, **kwargs):
             #     return _extract_and_send(
             #         method_name,
-            #         api,
+            #         api,––asdfasd
             #         uri,
             #         func,
             #         *args,
@@ -182,13 +188,3 @@ http_head = http_endpoint("HEAD")
 http_options = http_endpoint("OPTIONS")
 http_trace = http_endpoint("TRACE")
 http_connect = http_endpoint("CONNECT")
-
-# http_get2 = HttpEndpoint("GET")
-# http_post2 = HttpEndpoint("POST")
-# http_put2 = HttpEndpoint("PUT")
-# http_delete2 = HttpEndpoint("DELETE")
-# http_patch2 = HttpEndpoint("PATCH")
-# http_head2 = HttpEndpoint("HEAD")
-# http_options2 = HttpEndpoint("OPTIONS")
-# http_trace2 = HttpEndpoint("TRACE")
-# http_connect2 = HttpEndpoint("CONNECT")

@@ -36,5 +36,9 @@ class MyHttpApiHost:
     def delete_item(self, item_id):
         pass
     
+    @http_put('/WeatherForecast/{city}/{days}/{people}/fruit/{banana}')
+    def update_weather_forecast(self, city: str, days:int) -> dict:
+        pass
+    
 api = MyHttpApiHost()
 print(api.__dict__)
