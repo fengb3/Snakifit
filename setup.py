@@ -14,6 +14,7 @@ setup(
         # List your package dependencies here
         "requests",
         "urllib3",
+        "httpx"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

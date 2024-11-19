@@ -1,7 +1,8 @@
+from typing import List
+
 from pydantic import BaseModel
 
-from snakifit.http_client import *
-from snakifit.http_host import http_host
+from snakifit import http_get, http_post, http_put, http_delete, http_host
 
 
 # Pydantic model for request validation
@@ -20,7 +21,7 @@ class MyHttpApiHost:
     def read_items(self) -> List[ItemResponse]:
         pass
     
-    @http_post('/items/{item_id}')
+    @http_post('/items')
     def create_item(self, item: ItemCreate) ->ItemResponse:
         pass
     
@@ -36,9 +37,10 @@ class MyHttpApiHost:
     def delete_item(self, item_id):
         pass
     
-    @http_put('/WeatherForecast/{city}/{days}/{people}/fruit/{banana}')
-    def update_weather_forecast(self, city: str, days:int) -> dict:
-        pass
+    # @http_put('/WeatherForecast/{city}/{days}/{people}/fruit/{banana}')
+    # def update_weather_forecast(self, city: str, days:int) -> dict:
+    #     pass
     
 api = MyHttpApiHost()
-print(api.__dict__)
+print(api.read_items())
+print(api.http_host_info.__dict__)

@@ -7,30 +7,37 @@ from requests import Request, Session
 from requests.exceptions import RequestException
 
 
-def http_host(base_url: str = ""):
-    def decorator(cls):
-        # add properties to class marked by http_host decorator
-        cls.base_url = base_url
-        cls.default_headers = {}
-        cls.enable_logging = True
-        cls.logger = logging.getLogger("http-client")
-        
-        def log_request(self, method: str, url: str, headers: dict, params: dict, data: Union[dict, None]):
-            if self.enable_logging:
-                self.logger.info(
-                    f"Request - Method: {method}, URL: {url}, Headers: {headers}, Params: {params}, Data: {data}")
-        
-        def log_response(self, response):
-            if self.enable_logging:
-                self.logger.info(f"with status code : {response.status_code} "
-                                 f"with content : {response.content}")
-        
-        cls.log_request = log_request
-        cls.log_response = log_response
-        
-        return cls
+# def http_host(base_url: str = ""):
+#     def decorator(cls):
+#         # add properties to class marked by http_host decorator
+#         cls.base_url = base_url
+#         cls.default_headers = {}
+#         cls.enable_logging = True
+#         cls.logger = logging.getLogger("http-client")
+#         
+#         def log_request(self, method: str, url: str, headers: dict, params: dict, data: Union[dict, None]):
+#             if self.enable_logging:
+#                 self.logger.info(
+#                     f"Request - Method: {method}, URL: {url}, Headers: {headers}, Params: {params}, Data: {data}")
+#         
+#         def log_response(self, response):
+#             if self.enable_logging:
+#                 self.logger.info(f"with status code : {response.status_code} "
+#                                  f"with content : {response.content}")
+#         
+#         cls.log_request = log_request
+#         cls.log_response = log_response
+#         
+#         return cls
+#     
+#     return decorator
+
+def _extract_and_send2(http_host, method_name, *args, **kwargs):
     
-    return decorator
+    http_host_info = http_host.http_host_info
+    http_endpoint_info = http_host_info.http_endpoints[method_name]
+    
+    pass
 
 
 def _extract_and_send(method_name: str, api, uri: str, func: Callable, *args, **kwargs):
@@ -93,7 +100,7 @@ def _extract_and_send(method_name: str, api, uri: str, func: Callable, *args, **
             data=data
         )
         response = Session().send(request.prepare())
-        # response = requests.request(method_name, url, params=queries, headers=headers, data=data, timeout=100)
+        # response = requests.request(method_name, base_url, params=queries, headers=headers, data=data, timeout=100)
         api.log_response(response)
         response.raise_for_status()
     except RequestException as e:
@@ -130,61 +137,3 @@ def _extract_and_send(method_name: str, api, uri: str, func: Callable, *args, **
     
     return data_dict
 
-
-class HttpEndpointInfo:
-    uri: str
-    http_method_name: str
-    path_keys: List[str]
-    args: List[str]
-    kwargs: Dict[str, str]
-    
-    def __init__(self, http_method_name: str, uri: str = ""):
-        self.http_method_name = http_method_name.upper()
-        self.uri = uri
-        self.path_keys = re.findall(r'{(.*?)}', uri)
-    
-    def check_path_params(self, func: Callable):
-        """检查函数的参数是否包含所有的path参数"""
-        signature = inspect.signature(func)
-        param_names = list(signature.parameters.keys())
-        missing_params = []
-        for key in self.path_keys:
-            if key not in param_names:
-                missing_params.append(key)
-        if missing_params:
-            raise ValueError(f"Missing path parameter(s) '{', '.join(missing_params)}' in function {func.__name__}")
-
-def http_endpoint(method_name: str):
-    def decorator(uri):
-        def wrapper(func):
-            http_endpoint_info = HttpEndpointInfo(method_name, uri)
-            http_endpoint_info.check_path_params(func)
-            func.http_endpoint_info = http_endpoint_info
-            
-            return func
-            # @functools.wraps(func)
-            # def wrapped(api, *args, **kwargs):
-            #     return _extract_and_send(
-            #         method_name,
-            #         api,––asdfasd
-            #         uri,
-            #         func,
-            #         *args,
-            #         **kwargs
-            #     )
-            # return wrapped
-        
-        return wrapper
-    
-    return decorator
-
-
-http_get = http_endpoint("GET")
-http_post = http_endpoint("POST")
-http_put = http_endpoint("PUT")
-http_delete = http_endpoint("DELETE")
-http_patch = http_endpoint("PATCH")
-http_head = http_endpoint("HEAD")
-http_options = http_endpoint("OPTIONS")
-http_trace = http_endpoint("TRACE")
-http_connect = http_endpoint("CONNECT")
