@@ -1,11 +1,11 @@
 import functools
 import logging
 
-from snakifit.handlers.simple_delegate import SimpleDelegate
+from snakifit.helper.http_host_helper import set_as_http_host
 from snakifit.http_info import *
 
+
 def _make_default_initializer(cls, base_url):
-    
     def default_http_host_initializer(self, *args, **kwargs):
         if not hasattr(self, 'http_host_info'):
             self.http_host_info = HttpHostInfo()
@@ -13,12 +13,12 @@ def _make_default_initializer(cls, base_url):
             logging.warning(f'{self} already initialized as http host')
         
         real_base_url = ''
-        if 'base_url' in kwargs:
-            real_base_url = kwargs['base_url']
+        if '_base_url' in kwargs:
+            real_base_url = kwargs['_base_url']
         else:
             real_base_url = base_url
         
-        self.http_host_info.base_url = real_base_url
+        self.http_host_info._base_url = real_base_url
         
         for name, method in cls.__dict__.items():
             if callable(method) and hasattr(method, 'http_endpoint_info') and method.http_endpoint_info is not None:
@@ -29,22 +29,6 @@ def _make_default_initializer(cls, base_url):
     return default_http_host_initializer
 
 
-def set_as_http_host(cls):
-    if hasattr(cls, 'http_host_initialize_handler'):
-        return cls
-    
-    original_init = cls.__init__
-    cls.http_host_initialize_handler = SimpleDelegate()
-    
-    def new_init(self, *args, **kwargs):
-        original_init(self)
-        cls.http_host_initialize_handler.invoke(self, *args, **kwargs)
-        # initialize_as_http_host(self)
-    
-    cls.__init__ = new_init
-    return cls
-
-
 def http_host(base_url: str = ""):
     def decorator(cls):
         set_as_http_host(cls)
@@ -53,6 +37,7 @@ def http_host(base_url: str = ""):
         return cls
     
     return decorator
+
 
 def http_endpoint(method_name: str):
     def decorator(uri):
@@ -68,8 +53,9 @@ def http_endpoint(method_name: str):
                     cls = api.__class__
                     if not hasattr(cls, 'http_host_initialize_handler'):
                         set_as_http_host(cls)
-                        
-                        # return _extract_and_send(
+                
+                # TODO: send
+                # return _extract_and_send(
                 #     method_name,
                 #     api,
                 #     uri,
@@ -77,21 +63,9 @@ def http_endpoint(method_name: str):
                 #     *args,
                 #     **kwargs
                 # )
+            
             return wrapped
         
         return wrapper
     
     return decorator
-
-
-# http_get = _http_endpoint("GET")
-# http_post = _http_endpoint("POST")
-# http_put = _http_endpoint("PUT")
-# http_delete = _http_endpoint("DELETE")
-# http_patch = _http_endpoint("PATCH")
-# http_head = _http_endpoint("HEAD")
-# http_options = _http_endpoint("OPTIONS")
-# http_trace = _http_endpoint("TRACE")
-# http_connect = _http_endpoint("CONNECT")
-# 
-# http_host = _http_host

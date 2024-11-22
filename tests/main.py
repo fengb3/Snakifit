@@ -3,6 +3,7 @@ from typing import List
 from pydantic import BaseModel
 
 from snakifit import http_get, http_post, http_put, http_delete, http_host
+from snakifit.handlers.request_handler import ApplicationJsonHandler, decorate_with_request_handlers
 
 
 # Pydantic model for request validation
@@ -14,6 +15,7 @@ class ItemCreate(BaseModel):
 class ItemResponse(ItemCreate):
     id: int
 
+@decorate_with_request_handlers(ApplicationJsonHandler)
 @http_host("http://localhost:8999")
 class MyHttpApiHost:
     
