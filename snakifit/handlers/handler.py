@@ -4,7 +4,13 @@ from typing import *
 
 T = TypeVar('T')
 
-class PriorityHandler(Generic[T], abc.ABC):
+
+class PriorityHandler(Generic[T], abc.ABC, Callable):
+    
+    def __call__(self, *args, **kwargs):
+        return self.handle(*args, **kwargs)
+    
+    @abc.abstractmethod
     def handle(self, t: T, *args, **kwargs):
         pass
     
@@ -13,6 +19,8 @@ class PriorityHandler(Generic[T], abc.ABC):
         return 10
     
     def __lt__(self, other):
+        if not hasattr(other, 'priority'):
+            return False # other is always less than self
         return self.priority < other.priority
 
 

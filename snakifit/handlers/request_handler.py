@@ -8,12 +8,14 @@ from typing import List, Callable, TypeVar, Generic, Type
 import httpx
 
 from snakifit.handlers.handler import PriorityHandler
-from snakifit.helper import set_as_http_host
+from snakifit.helper.http_host_helper import set_as_http_host
+
+# from snakifit.helper import set_as_http_host
 
 T = TypeVar('T')
 
 
-class RequestHandler(PriorityHandler[httpx.Request]):
+class RequestHandler(PriorityHandler[httpx.Request], abc.ABC):
     pass
 
 

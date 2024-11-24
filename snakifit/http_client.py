@@ -76,6 +76,7 @@ def _extract_and_send(method_name: str, api, uri: str, func: Callable, *args, **
     
     paths, queries, data = {}, {}, None
     
+    
     for param_name, param_value in bound_arguments.arguments.items():
         if param_name == "self":
             continue

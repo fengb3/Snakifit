@@ -1,3 +1,6 @@
+from typing import Callable
+
+
 def add_field_to_class_instance(cls, filed_name, field_value):
     
     if not isinstance(cls, type):
