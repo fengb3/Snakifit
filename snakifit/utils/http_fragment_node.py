@@ -122,62 +122,63 @@ def add_http_fragment_node(target) -> Union[HttpEndpointNode, HttpHostNode]:
     return cur_node
 
 
-def http_host(base_url: str = ""):
-    print('http_host called')
-    
-    def add_http_host_node(target):
-        # print('add_http_host_node called')
-        # cur_node = HttpHostNode(value=target)
-        # cur_node.base_url = base_url
-        # target.node = cur_node
-        # 
-        # for name, item in target.__dict__.items():
-        #     if hasattr(item, 'node') and item.node is not None:
-        #         # print(f'{name} has node on it')
-        #         item.node.parent = cur_node
-        node = add_http_fragment_node(target)
-        node.uri_fragment = base_url
-        
-    
-    return parasite(add_http_host_node)
+# def http_host(base_url: str = ""):
+#     print('http_host called')
+#     
+#     def add_http_host_node(target):
+#         # print('add_http_host_node called')
+#         # cur_node = HttpHostNode(value=target)
+#         # cur_node.base_url = base_url
+#         # target.node = cur_node
+#         # 
+#         # for name, item in target.__dict__.items():
+#         #     if hasattr(item, 'node') and item.node is not None:
+#         #         # print(f'{name} has node on it')
+#         #         item.node.parent = cur_node
+#         node = add_http_fragment_node(target)
+#         node.uri_fragment = base_url
+#         
+#     
+#     return parasite(add_http_host_node)
 
 
-def http_endpoint(method_name: str, uri: str):
-    def add_http_endpoint_node(target):
-        # cur_node = HttpEndpointNode(value=target)
-        # cur_node.method = method_name
-        # cur_node.uri_fragment = uri
-        # target.node = cur_node
-        node = add_http_fragment_node(target) 
-        node.method = method_name
-        node.uri_fragment = uri
-    
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapped(*args, **kwargs):
-            func.node.send()
-        
-        return wrapped
-    
-    return parasite(add_http_endpoint_node, wrapper=decorator)
+# def http_endpoint(method_name: str, uri: str):
+#     def add_http_endpoint_node(target):
+#         # cur_node = HttpEndpointNode(value=target)
+#         # cur_node.method = method_name
+#         # cur_node.uri_fragment = uri
+#         # target.node = cur_node
+#         node = add_http_fragment_node(target) 
+#         node.method = method_name
+#         node.uri_fragment = uri
+#     
+#     def decorator(func):
+#         @functools.wraps(func)
+#         def wrapped(*args, **kwargs):
+#             func.node.send()
+#         
+#         return wrapped
+#     
+#     return parasite(add_http_endpoint_node, wrapper=decorator)
 
 
-def http_method_wrapper(method_name: str):
-    def decorator(uri):
-        return http_endpoint(method_name, uri)
-    
-    return decorator
-
-
-get = http_method_wrapper('GET')
-post = http_method_wrapper('POST')
-put = http_method_wrapper('PUT')
-delete = http_method_wrapper('DELETE')
-patch = http_method_wrapper('PATCH')
-options = http_method_wrapper('OPTIONS')
-head = http_method_wrapper('HEAD')
-trace = http_method_wrapper('TRACE')
-connect = http_method_wrapper('CONNECT')
+# def http_method_wrapper(method_name: str):
+#     def decorator(uri):
+#         # return http_endpoint(method_name, uri)
+#         pass
+#     
+#     return decorator
+# 
+# 
+# get = http_method_wrapper('GET')
+# post = http_method_wrapper('POST')
+# put = http_method_wrapper('PUT')
+# delete = http_method_wrapper('DELETE')
+# patch = http_method_wrapper('PATCH')
+# options = http_method_wrapper('OPTIONS')
+# head = http_method_wrapper('HEAD')
+# trace = http_method_wrapper('TRACE')
+# connect = http_method_wrapper('CONNECT')
 
 
 def loging_request_handler():
@@ -194,19 +195,19 @@ def loging_request_handler():
 
 
 # test code below
-@loging_request_handler()
-@http_host('http://localhost:8000')
-class TestApi:
-    
-    @get('/test')
-    def test(self):
-        print('test')
-    
-    @post('/test')
-    def test_post(self):
-        print('test post')
-
-
-if __name__ == '__main__':
-    api = TestApi()
-    api.test()
+# @loging_request_handler()
+# @http_host('http://localhost:8000')
+# class TestApi:
+#     
+#     @get('/test')
+#     def test(self):
+#         print('test')
+#     
+#     @post('/test')
+#     def test_post(self):
+#         print('test post')
+# 
+# 
+# if __name__ == '__main__':
+#     api = TestApi()
+#     api.test()
