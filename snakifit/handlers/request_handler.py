@@ -61,7 +61,7 @@ def decorate_with_request_handlers(*args):
 #         return 999
 #     
 #     def handle(self, request : httpx.Request):
-#         logging.info(f"{request.method.to_upper()} '{request.url}' "
+#         logging.info(f"{request.method_name.to_upper()} '{request.url}' "
 #                      f"with data '{request.content}' "
 #                      f"with headers '{request.headers}' "
 #                      f"with queries '{request.url}'")

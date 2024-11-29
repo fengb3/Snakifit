@@ -19,10 +19,10 @@ from snakifit.http_info import *
 #         cls.enable_logging = True
 #         cls.logger = logging.getLogger("http-client")
 #         
-#         def log_request(self, method: str, url: str, headers: dict, params: dict, data: Union[dict, None]):
+#         def log_request(self, method_name: str, url: str, headers: dict, params: dict, data: Union[dict, None]):
 #             if self.enable_logging:
 #                 self.logger.info(
-#                     f"Request - Method: {method}, URL: {url}, Headers: {headers}, Params: {params}, Data: {data}")
+#                     f"Request - Method: {method_name}, URL: {url}, Headers: {headers}, Params: {params}, Data: {data}")
 #         
 #         def log_response(self, response):
 #             if self.enable_logging:
@@ -60,7 +60,7 @@ def _extract_and_send(method_name: str, api, uri: str, func: Callable, *args, **
     """
     Extracts the parameters from the function and sends the request to the server.
         
-    :param method_name: HTTP method can be GET, POST, PUT, DELETE, etc.
+    :param method_name: HTTP method_name can be GET, POST, PUT, DELETE, etc.
     :param api: the class_instance of the API class
     :param uri: the URI of the endpoint
     :param func: the function to be called

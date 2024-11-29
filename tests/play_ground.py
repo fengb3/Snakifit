@@ -116,7 +116,7 @@ class TestClass:
 #             parent_node.add_child(child_node)
 #             build_tree(obj, child_node)
 #         elif callable(obj):
-#             child_node = DoubleLinkedMultiTree(name, "method")
+#             child_node = DoubleLinkedMultiTree(name, "method_name")
 #             parent_node.add_child(child_node)
 #     
 #     return parent_node

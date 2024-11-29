@@ -1,10 +1,14 @@
-class MultiCastDelegate:
+from typing import List, Any, Callable
+
+from snakifit.handlers.delegate import Delegate
+
+
+class MultiCastDelegate(Delegate):
     """
     Represents a multicast delegate that can hold multiple callable objects.
-    
-    
     """
-
+    delegates: List[Callable]
+    
     def __init__(self):
         """
         Initializes a new instance of the MultiCastDelegate class.
@@ -57,16 +61,6 @@ class MultiCastDelegate:
         
         :param args: Positional arguments to pass to the delegates.
         :param kwargs: Keyword arguments to pass to the delegates.
-        """
-        self(*args, **kwargs)
-
-    def __call__(self, *args, **kwargs):
-        """
-        Invokes all delegates with the given arguments. Overrides the () operator.
-        
-        :param args: Positional arguments to pass to the delegates.
-        :param kwargs: Keyword arguments to pass to the delegates.
-        :return: The result of the last delegate called.
         """
         result = None
         for delegate in self.delegates:

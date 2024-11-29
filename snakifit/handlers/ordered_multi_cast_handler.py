@@ -1,39 +1,31 @@
 import heapq
 from typing import List, Callable
 
+from snakifit.handlers.delegate import Delegate
+from snakifit.handlers.multi_cast_delegate import MultiCastDelegate
 
-class OrderedMultiCastHandler:
+
+class OrderedMultiCastHandler(MultiCastDelegate):
     
-    handlers: List[Callable]
-    
-    def __init__(self):
-        self.handlers = []
-        
+    priority: int
+    """调用优先级"""
     
     def invoke(self, *args, **kwargs):
-        for handler in self.handlers:
-            handler(*args, **kwargs)
-        
+        pass
+    
+    def __init__(self, priority: int = 0):
+        super().__init__()
+        self.priority = priority
     
     def add(self, other):
         if not callable(other):
             raise ValueError(f'{other} should be a callable')
         
-        heapq.heappush(self.handlers, other)
+        heapq.heappush(self.delegates, other)
     
-    def remove(self, other):
-        self.handlers.remove(other)
+    def __lt__(self, other):
         
+        if hasattr(other, 'priority') and other.priority is not None:
+            return self.priority < other.priority
         
-    def __iadd__(self, other):
-        self.add(other)
-        return self
-    
-    def __isub__(self, other):
-        self.remove(other)
-    
-    def __call__(self, *args, **kwargs):
-        self.invoke(*args, **kwargs)
-            
-    
-        
+        return False

@@ -20,9 +20,9 @@
 #         
 #         self.http_host_info._base_url = real_base_url
 #         
-#         for name, method in cls.__dict__.items():
-#             if callable(method) and hasattr(method, 'http_endpoint_info') and method.http_endpoint_info is not None:
-#                 self.http_host_info.http_endpoints[name] = method.http_endpoint_info
+#         for name, method_name in cls.__dict__.items():
+#             if callable(method_name) and hasattr(method_name, 'http_endpoint_info') and method_name.http_endpoint_info is not None:
+#                 self.http_host_info.http_endpoints[name] = method_name.http_endpoint_info
 #                 print(f"Decorating {name}")
 #         return self
 #     
@@ -55,7 +55,8 @@
 #                         set_as_http_host(cls)
 #                 
 #                 # TODO: send
-#                 # return _extract_and_send(
+#                 # return 
+#                 (
 #                 #     method_name,
 #                 #     api,
 #                 #     uri,
@@ -71,56 +72,40 @@
 #     return decorator
 import functools
 
-from snakifit.helper.decorator_helper import parasite
-from snakifit.utils.http_fragment_node import add_http_fragment_node
+from snakifit.helper.decorator_helper import make_parasite_decorator
+from snakifit.http_info.http_fragment_node import add_http_fragment_node, HttpEndpointNode, send
 
 
-def http_host(base_url: str = ""):
-    # def decorator(cls):
-    #     set_as_http_host(cls)
-    #     default_initializer = _make_default_initializer(cls, base_url)
-    #     cls.http_host_initialize_handler += default_initializer
-    #     return cls
-    
+def _http_host(base_url: str = ""):
     def add_http_host_node(target):
-        # print('add_http_host_node called')
-        # cur_node = HttpHostNode(value=target)
-        # cur_node.base_url = base_url
-        # target.node = cur_node
-        # 
-        # for name, item in target.__dict__.items():
-        #     if hasattr(item, 'node') and item.node is not None:
-        #         # print(f'{name} has node on it')
-        #         item.node.parent = cur_node
         node = add_http_fragment_node(target)
         node.uri_fragment = base_url
     
-    return parasite(add_http_host_node)
+    return make_parasite_decorator(add_http_host_node)
+
+
+def http_host(base_url: str = ""):
+    return _http_host(base_url)
 
 
 def _http_endpoint(method_name: str, uri: str):
     def add_http_endpoint_node(target):
-        # cur_node = HttpEndpointNode(value=target)
-        # cur_node.method = method_name
-        # cur_node.uri_fragment = uri
-        # target.node = cur_node
-        node = add_http_fragment_node(target)
+        node: HttpEndpointNode = add_http_fragment_node(target)
         node.method = method_name
-        node.uri_fragment = uri
+        node.uri = uri
     
     def wrapper(func):
-        @functools.wraps(func)
+        # @functools.wraps(func)
         def wrapped(*args, **kwargs):
-            func.node.send()
+            send(func.http_fragment_node)  # pass query params here
         
         return wrapped
     
-    return parasite(add_http_endpoint_node, wrapper=wrapper)
+    return make_parasite_decorator(add_http_endpoint_node, wrapper=wrapper)
 
 
 def http_endpoint(method_name: str):
-    
     def decorator(uri):
-        return http_endpoint(method_name, uri)
+        return _http_endpoint(method_name, uri)
     
     return decorator

@@ -131,7 +131,7 @@
     - Develop a CLI tool for testing endpoints, generating API clients, and managing configurations.
     - Example usage:
       ```bash
-      myclient test /WeatherForecast/shanghai --method GET
+      myclient test /WeatherForecast/shanghai --method_name GET
       ```
 
 19. [ ] **Integrations with Popular Frameworks**

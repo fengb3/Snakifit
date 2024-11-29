@@ -1,6 +1,5 @@
-from .handler import *
+from .handler import PriorityHandler
 
 __all__ = [
     'PriorityHandler',
-    'HandlerHolder'
 ]

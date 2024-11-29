@@ -1,8 +1,24 @@
-from fastapi import FastAPI, HTTPException
+import logging
+
+from fastapi import FastAPI, HTTPException, Request
+# from fastapi.logger import logger
 from pydantic import BaseModel
 from typing import List
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": False})
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+ch = logging.StreamHandler()
+fh = logging.FileHandler(filename='./server.log')
+formatter = logging.Formatter(
+    "%(asctime)s - %(module)s - %(funcName)s - line:%(lineno)d - %(levelname)s - %(message)s"
+)
+
+ch.setFormatter(formatter)
+fh.setFormatter(formatter)
+logger.addHandler(ch) #将日志输出至屏幕
+logger.addHandler(fh) #将日志输出至文件
 
 # In-memory database (dictionary)
 database = {}
@@ -18,6 +34,29 @@ class ItemCreate(BaseModel):
 class ItemResponse(ItemCreate):
     id: int
 
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    import time
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
+
+@app.middleware("http")
+async def add_custom_log(request: Request, call_next):
+    logger.info(f'headers: {request.headers}')
+    response = await call_next(request)
+    return response
+
+@app.post("/test")
+def test(request: Request):
+    logger.info(f'headers: {request.headers}')
+    
+    # print out request details
+    logger.info(f'headers: {request.headers}')
+    logger.info(f'query_params: {request.query_params}')
+    return {"msg": "ok"}
 
 @app.post("/items", response_model=ItemResponse)
 def create_item(item: ItemCreate):

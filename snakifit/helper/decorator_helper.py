@@ -38,22 +38,20 @@ def add_field_to_method_instance(method, field_name, field_value):
     
     return wrapper
 
-def parasite(*args, **kwargs):
+def _plain_wrapper(target):
+    return target
+
+def make_parasite_decorator(*args, **kwargs):
     
-    if 'wrapper' in kwargs:
-        wrapper = kwargs['wrapper']
-    else:
-        wrapper = lambda target: target
+    # 检查是否有wrapper参数，如果有就使用它，否则使用默认的wrapper
+    wrapper = kwargs.get('wrapper', _plain_wrapper)
     
     def decorator(target):
         
-        for operation in args:
-            
-            if not isinstance(operation, Callable):
-                continue
-            
-            operation(target)
+        # 遍历所有的参数，如果是可执行的，就执行它
+        for parasite_operation in filter(lambda op: callable(op), args):
+            parasite_operation(target) # 执行操作
         
-        return wrapper(target)
+        return wrapper(target) # 返回装饰器
     
     return decorator
